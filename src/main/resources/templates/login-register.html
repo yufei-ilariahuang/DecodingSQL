@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title><!-- src/main/resources/templates/login-register.html -->
+<!-- src/main/resources/templates/login-register.html -->
         <!DOCTYPE html>
         <html xmlns:th="http://www.thymeleaf.org">
         <head>
@@ -390,7 +386,20 @@
                         <label class="form-check-label" for="rememberMe">Remember me</label>
                     </div>
 
-                    <button type="submit" class="btn btn-auth">Login <i class="fas fa-arrow-right ms-1"></i></button>
+                    <div id="loginError" class="alert alert-danger" style="display: none;"></div>
+
+                    <div class="row">
+                        <div class="col-6">
+                            <button type="button" id="studentLoginBtn" class="btn btn-auth w-100 mb-2">
+                                <i class="fas fa-user-graduate me-1"></i> Student Login
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button type="button" id="instructorLoginBtn" class="btn btn-auth w-100 mb-2">
+                                <i class="fas fa-chalkboard-teacher me-1"></i> Instructor Login
+                            </button>
+                        </div>
+                    </div>
                 </form>
 
                 <div class="text-center mt-3">
@@ -466,13 +475,91 @@
 </div>
 
 <script>
-    // Tab switching
+    // Tab switching and login functionality
     document.addEventListener('DOMContentLoaded', function() {
         const loginTab = document.getElementById('loginTab');
         const registerTab = document.getElementById('registerTab');
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
 
+        // Login function that handles different user types
+        function attemptLogin(userType) {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+
+            // Create request payload
+            const loginData = {
+                email: email,
+                password: password,
+                userType: userType
+            };
+
+            console.log(`Attempting ${userType} login for ${email}`);
+
+            // Clear previous errors
+            errorDiv.style.display = 'none';
+
+            // Send login request
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(loginData),
+                credentials: 'include' // Important for session cookies
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json().then(data => {
+                            // Save user info to session storage
+                            sessionStorage.setItem('currentUser', JSON.stringify(data));
+                            sessionStorage.setItem('userType', userType);
+
+                            // Redirect based on user type
+                            if (userType === 'student') {
+                                window.location.href = '/student/dashboard';
+                            } else {
+                                window.location.href = '/instructor/dashboard';
+                            }
+                        });
+                    } else {
+                        return response.json().then(error => {
+                            // Display error message
+                            errorDiv.textContent = error.message || `${userType} login failed. Please check your credentials.`;
+                            errorDiv.style.display = 'block';
+                        }).catch(err => {
+                            // Handle non-JSON response
+                            errorDiv.textContent = 'Login failed. Please check your credentials.';
+                            errorDiv.style.display = 'block';
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Login error:', error);
+                    errorDiv.textContent = 'An error occurred. Please try again later.';
+                    errorDiv.style.display = 'block';
+                });
+        }
+
+        // Student login button
+        document.getElementById('studentLoginBtn').addEventListener('click', function() {
+            attemptLogin('student');
+        });
+
+        // Instructor login button
+        document.getElementById('instructorLoginBtn').addEventListener('click', function() {
+            attemptLogin('instructor');
+        });
+
+        // Form submission (add keypress Enter support)
+        document.getElementById('userLoginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            // Default to student login when pressing Enter
+            attemptLogin('student');
+        });
+
+        // Tab switching functionality
         loginTab.addEventListener('click', function() {
             loginTab.classList.add('active');
             registerTab.classList.remove('active');
@@ -487,7 +574,7 @@
             loginForm.style.display = 'none';
         });
 
-        // Role selection
+        // Role selection in registration form
         const roleOptions = document.querySelectorAll('.role-option');
         roleOptions.forEach(option => {
             option.addEventListener('click', function() {
@@ -497,18 +584,18 @@
             });
         });
 
-        // Password validation
+        // Password validation for registration
         const registerPassword = document.getElementById('registerPassword');
         const confirmPassword = document.getElementById('confirmPassword');
 
-        confirmPassword.addEventListener('input', function() {
+        confirmPassword?.addEventListener('input', function() {
             if (this.value !== registerPassword.value) {
                 this.classList.add('is-invalid');
-                if (!this.nextElementSibling.classList.contains('error-message')) {
+                if (!this.nextElementSibling || !this.nextElementSibling.classList.contains('error-message')) {
                     const errorMsg = document.createElement('div');
                     errorMsg.className = 'error-message';
                     errorMsg.textContent = 'Passwords do not match';
-                    this.insertAdjacentElement('afterend', errorMsg);
+                    this.parentNode.appendChild(errorMsg);
                 }
             } else {
                 this.classList.remove('is-invalid');
@@ -519,7 +606,7 @@
             }
         });
 
-        // Floating elements animation
+        // Floating elements animation (keep existing code)
         const floatingElements = document.querySelectorAll('.floating-element');
 
         floatingElements.forEach(element => {
@@ -535,23 +622,27 @@
         });
 
         // Add keyframes for floating animation
-        const style = document.createElement('style');
-        style.innerHTML = `
-                @keyframes float {
-                    0% { transform: translate(0, 0) rotate(0deg); opacity: 0.1; }
-                    25% { transform: translate(5px, 10px) rotate(3deg); opacity: 0.15; }
-                    50% { transform: translate(10px, 5px) rotate(5deg); opacity: 0.1; }
-                    75% { transform: translate(5px, -5px) rotate(2deg); opacity: 0.15; }
-                    100% { transform: translate(0, 0) rotate(0deg); opacity: 0.1; }
-                }
-            `;
-        document.head.appendChild(style);
+        if (!document.querySelector('style[data-animation="float"]')) {
+            const style = document.createElement('style');
+            style.setAttribute('data-animation', 'float');
+            style.innerHTML = `
+            @keyframes float {
+                0% { transform: translate(0, 0) rotate(0deg); opacity: 0.1; }
+                25% { transform: translate(5px, 10px) rotate(3deg); opacity: 0.15; }
+                50% { transform: translate(10px, 5px) rotate(5deg); opacity: 0.1; }
+                75% { transform: translate(5px, -5px) rotate(2deg); opacity: 0.15; }
+                100% { transform: translate(0, 0) rotate(0deg); opacity: 0.1; }
+            }
+        `;
+            document.head.appendChild(style);
+        }
     });
 
     // Toggle password visibility
     function togglePassword(inputId) {
         const passwordInput = document.getElementById(inputId);
-        const icon = passwordInput.nextElementSibling.querySelector('i');
+        const toggleButton = passwordInput.parentNode.querySelector('.password-toggle');
+        const icon = toggleButton.querySelector('i');
 
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
@@ -564,10 +655,5 @@
         }
     }
 </script>
-</body>
-</html></title>
-</head>
-<body>
-
 </body>
 </html>

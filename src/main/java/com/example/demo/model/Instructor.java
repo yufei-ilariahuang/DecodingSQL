@@ -13,24 +13,21 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "STUDENT")
-//@PrimaryKeyJoinColumn(name = "student_id")
-public class Student{
-
+@Table(name = "INSTRUCTOR")
+public class Instructor {
     @Id
-    @Column(name = "student_id", nullable = false, unique = true)
-    private String studentId;
-    @Column(nullable = false, unique = true)
+    @Column(name = "instructor_id")
+    private String instructorId;
+
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "intro_content", columnDefinition = "TEXT")
+    @Column(name = "intro_content")
     private String introContent;
-
-
 }

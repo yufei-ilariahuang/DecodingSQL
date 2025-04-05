@@ -4,12 +4,12 @@ import com.example.demo.dto.StudentDto;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Student;
 import com.example.demo.repository.StudentRepository;
-import com.google.api.gax.rpc.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,19 +20,27 @@ public class StudentService {
     public StudentDto getStudent(String id) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
-        return StudentDto.fromEntity(student);
+        return convertToDto(student);
     }
 
     public List<StudentDto> getAllStudents() {
         return studentRepository.findAll().stream()
-                .map(StudentDto::fromEntity)
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
+
     public StudentDto getStudentByUsername(String username) {
         Student student = studentRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found with username: " + username));
-        return StudentDto.fromEntity(student);
+        return convertToDto(student);
     }
+
+    public StudentDto getStudentByEmail(String email) {
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with email: " + email));
+        return convertToDto(student);
+    }
+
     // Helper method to convert Student entity to StudentDto
     private StudentDto convertToDto(Student student) {
         return StudentDto.builder()
@@ -40,8 +48,10 @@ public class StudentService {
                 .username(student.getUsername())
                 .email(student.getEmail())
                 .introContent(student.getIntroContent())
+                // Don't include password in DTO for security
                 .build();
     }
+
     @Transactional
     public StudentDto createStudent(StudentDto studentDto) {
         // Check if username or email already exists
@@ -54,7 +64,14 @@ public class StudentService {
 
         // Create new student
         Student student = new Student();
-        student.setStudentId(studentDto.getId());
+
+        // Generate a student ID if none provided
+        if (studentDto.getId() == null || studentDto.getId().isEmpty()) {
+            student.setStudentId("student_" + UUID.randomUUID().toString().substring(0, 6));
+        } else {
+            student.setStudentId(studentDto.getId());
+        }
+
         student.setUsername(studentDto.getUsername());
         student.setEmail(studentDto.getEmail());
         student.setPassword(studentDto.getPassword());
@@ -68,6 +85,18 @@ public class StudentService {
     public StudentDto updateStudent(String id, StudentDto studentDto) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
+
+        // Check if username is being changed and if it's already taken
+        if (!student.getUsername().equals(studentDto.getUsername())
+                && studentRepository.existsByUsername(studentDto.getUsername())) {
+            throw new IllegalArgumentException("Username already taken");
+        }
+
+        // Check if email is being changed and if it's already taken
+        if (!student.getEmail().equals(studentDto.getEmail())
+                && studentRepository.existsByEmail(studentDto.getEmail())) {
+            throw new IllegalArgumentException("Email already taken");
+        }
 
         // Update fields
         student.setUsername(studentDto.getUsername());
@@ -88,6 +117,37 @@ public class StudentService {
         studentRepository.delete(student);
     }
 
+    /**
+     * Authenticates a student by email and password
+     *
+     * @param email The student's email
+     * @param password The student's password (plain text for now)
+     * @return true if authentication is successful, false otherwise
+     */
+    public boolean authenticateStudent(String email, String password) {
+        try {
+            Student student = studentRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("Student not found with email: " + email));
+            // In a real application, you should use a password encoder
+            return student.getPassword().equals(password);
+        } catch (ResourceNotFoundException e) {
+            return false;
+        }
+    }
 
-    // Other business methods
+    /**
+     * Logs in a student and returns their data
+     *
+     * @param email The student's email
+     * @param password The student's password
+     * @return StudentDto if login successful
+     * @throws IllegalArgumentException if credentials are invalid
+     */
+    public StudentDto loginStudent(String email, String password) {
+        if (authenticateStudent(email, password)) {
+            return getStudentByEmail(email);
+        } else {
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+    }
 }
