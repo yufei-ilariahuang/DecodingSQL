@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.SqlProblemMapper">
+    <resultMap id="SqlProblemResultMap" type="com.example.demo.model.SqlProblem">
+        <id property="id" column="problem_id" />
+        <result property="title" column="title" />
+        <result property="description" column="description" />
+        <result property="difficultyLevel" column="difficulty_level" />
+        <result property="createdBy" column="created_by" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        problem_id, title, description, difficulty_level, created_by, created_at
+    </sql>
+
+    <select id="findById" resultMap="SqlProblemResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        SQL_PROBLEM
+        WHERE
+        problem_id = #{problemId}
+    </select>
+
+    <select id="findAll" resultMap="SqlProblemResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        SQL_PROBLEM
+    </select>
+
+    <select id="findByDifficultyLevel" resultMap="SqlProblemResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        SQL_PROBLEM
+        WHERE
+        difficulty_level = #{difficultyLevel}
+    </select>
+
+    <select id="findByCreator" resultMap="SqlProblemResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        SQL_PROBLEM
+        WHERE
+        created_by = #{createdBy}
+    </select>
+
+    <select id="findByTitle" resultMap="SqlProblemResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        SQL_PROBLEM
+        WHERE
+        title LIKE CONCAT('%', #{title}, '%')
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.model.SqlProblem">
+        INSERT INTO SQL_PROBLEM (
+            problem_id,
+            title,
+            description,
+            difficulty_level,
+            created_by,
+            created_at
+        ) VALUES (
+                     #{id},
+                     #{title},
+                     #{description},
+                     #{difficultyLevel},
+                     #{createdBy},
+                     #{createdAt}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.model.SqlProblem">
+        UPDATE SQL_PROBLEM SET
+                               title = #{title},
+                               description = #{description},
+                               difficulty_level = #{difficultyLevel},
+                               created_by = #{createdBy}
+        WHERE
+            problem_id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM SQL_PROBLEM
+        WHERE problem_id = #{problemId}
+    </delete>
+</mapper>

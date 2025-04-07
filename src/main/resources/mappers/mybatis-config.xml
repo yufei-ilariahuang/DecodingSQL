@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <!-- Enable camelCase mapping from database column names to Java property names -->
+        <setting name="mapUnderscoreToCamelCase" value="true" />
+        <!-- NULL value handling -->
+        <setting name="jdbcTypeForNull" value="NULL" />
+        <!-- Cache settings -->
+        <setting name="cacheEnabled" value="true" />
+    </settings>
+
+    <typeAliases>
+        <package name="com.example.demo.model"/>
+    </typeAliases>
+</configuration>

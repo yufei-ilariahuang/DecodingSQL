@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.SessionSubmissionMapper">
+    <resultMap id="SessionSubmissionResultMap" type="com.example.demo.model.SessionSubmission">
+        <id property="id" column="submission_id" />
+        <result property="studentId" column="student_id" />
+        <result property="problemId" column="problem_id" />
+        <result property="submissionContent" column="submission_content" />
+        <result property="grade" column="grade" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        submission_id, student_id, problem_id, submission_content, grade
+    </sql>
+    <select id="findByStudentIdAndProblemId" resultMap="SessionSubmissionResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        SESSION_SUBMISSION
+        WHERE
+        student_id = #{studentId}
+        AND problem_id = #{problemId}
+    </select>
+    <select id="findById" resultMap="SessionSubmissionResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        SESSION_SUBMISSION
+        WHERE
+        submission_id = #{submissionId}
+    </select>
+
+    <select id="findAll" resultMap="SessionSubmissionResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        SESSION_SUBMISSION
+    </select>
+
+    <select id="findByStudentId" resultMap="SessionSubmissionResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        SESSION_SUBMISSION
+        WHERE
+        student_id = #{studentId}
+    </select>
+
+    <select id="findByProblemId" resultMap="SessionSubmissionResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        SESSION_SUBMISSION
+        WHERE
+        problem_id = #{problemId}
+    </select>
+
+    <select id="findByGradeRange" resultMap="SessionSubmissionResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        SESSION_SUBMISSION
+        WHERE
+        grade BETWEEN #{minGrade} AND #{maxGrade}
+    </select>
+
+    <select id="getAverageGradeByStudentId" resultType="java.lang.Double">
+        SELECT
+            AVG(grade)
+        FROM
+            SESSION_SUBMISSION
+        WHERE
+            student_id = #{studentId}
+    </select>
+
+    <select id="getMaxGradeByStudentId" resultType="java.lang.Integer">
+        SELECT
+            MAX(grade)
+        FROM
+            SESSION_SUBMISSION
+        WHERE
+            student_id = #{studentId}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.model.SessionSubmission">
+        INSERT INTO SESSION_SUBMISSION (
+            submission_id,
+            student_id,
+            problem_id,
+            submission_content,
+            grade
+        ) VALUES (
+                     #{id},
+                     #{studentId},
+                     #{problemId},
+                     #{submissionContent},
+                     #{grade}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.model.SessionSubmission">
+        UPDATE SESSION_SUBMISSION SET
+                                      student_id = #{studentId},
+                                      problem_id = #{problemId},
+                                      submission_content = #{submissionContent},
+                                      grade = #{grade}
+        WHERE
+            submission_id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM SESSION_SUBMISSION
+        WHERE submission_id = #{submissionId}
+    </delete>
+</mapper>

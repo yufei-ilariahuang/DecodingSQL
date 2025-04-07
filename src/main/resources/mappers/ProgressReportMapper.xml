@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.ProgressReportMapper">
+    <resultMap id="ProgressReportResultMap" type="com.example.demo.model.ProgressReport">
+        <id property="id" column="report_id" />
+        <result property="studentId" column="student_id" />
+        <result property="createdTime" column="created_time" />
+        <result property="reportContent" column="report_content" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        report_id, student_id, created_time, report_content
+    </sql>
+
+    <select id="findById" resultMap="ProgressReportResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        PROGRESS_REPORT
+        WHERE
+        report_id = #{reportId}
+    </select>
+
+    <select id="findAll" resultMap="ProgressReportResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        PROGRESS_REPORT
+    </select>
+
+    <select id="findByStudentId" resultMap="ProgressReportResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        PROGRESS_REPORT
+        WHERE
+        student_id = #{studentId}
+        ORDER BY
+        created_time DESC
+    </select>
+
+    <select id="findByCreatedTimeAfter" resultMap="ProgressReportResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        PROGRESS_REPORT
+        WHERE
+        created_time > #{time}
+        ORDER BY
+        created_time DESC
+    </select>
+
+    <select id="findLatestByStudentId" resultMap="ProgressReportResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        PROGRESS_REPORT
+        WHERE
+        student_id = #{studentId}
+        ORDER BY
+        created_time DESC
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.model.ProgressReport">
+        INSERT INTO PROGRESS_REPORT (
+            report_id,
+            student_id,
+            created_time,
+            report_content
+        ) VALUES (
+                     #{id},
+                     #{studentId},
+                     #{createdTime},
+                     #{reportContent}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.model.ProgressReport">
+        UPDATE PROGRESS_REPORT SET
+                                   student_id = #{studentId},
+                                   created_time = #{createdTime},
+                                   report_content = #{reportContent}
+        WHERE
+            report_id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM PROGRESS_REPORT
+        WHERE report_id = #{reportId}
+    </delete>
+</mapper>

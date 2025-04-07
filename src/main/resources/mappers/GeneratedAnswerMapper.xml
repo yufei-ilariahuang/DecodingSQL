@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.GeneratedAnswerMapper">
+    <resultMap id="GeneratedAnswerResultMap" type="com.example.demo.model.GeneratedAnswer">
+        <id property="problemId" column="problem_id" />
+        <result property="generatedContent" column="generated_content" />
+        <result property="generatedTime" column="generated_time" />
+        <result property="studentId" column="student_id" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        problem_id, generated_content, generated_time, student_id
+    </sql>
+
+    <select id="findByProblemId" resultMap="GeneratedAnswerResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        GENERATED_ANSWER
+        WHERE
+        problem_id = #{problemId}
+    </select>
+
+    <select id="findAll" resultMap="GeneratedAnswerResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        GENERATED_ANSWER
+    </select>
+
+    <select id="findByStudentId" resultMap="GeneratedAnswerResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        GENERATED_ANSWER
+        WHERE
+        student_id = #{studentId}
+    </select>
+
+    <select id="findByGeneratedTimeAfter" resultMap="GeneratedAnswerResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        GENERATED_ANSWER
+        WHERE
+        generated_time > #{time}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.model.GeneratedAnswer">
+        INSERT INTO GENERATED_ANSWER (
+            problem_id,
+            generated_content,
+            generated_time,
+            student_id
+        ) VALUES (
+                     #{problemId},
+                     #{generatedContent},
+                     #{generatedTime},
+                     #{studentId}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.model.GeneratedAnswer">
+        UPDATE GENERATED_ANSWER SET
+                                    generated_content = #{generatedContent},
+                                    generated_time = #{generatedTime},
+                                    student_id = #{studentId}
+        WHERE
+            problem_id = #{problemId}
+    </update>
+
+    <delete id="deleteByProblemId">
+        DELETE FROM GENERATED_ANSWER
+        WHERE problem_id = #{problemId}
+    </delete>
+</mapper>

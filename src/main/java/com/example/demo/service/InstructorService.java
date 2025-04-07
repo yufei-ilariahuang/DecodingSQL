@@ -2,8 +2,8 @@ package com.example.demo.service;
 
 import com.example.demo.dto.InstructorDto;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.mapper.InstructorMapper;
 import com.example.demo.model.Instructor;
-import com.example.demo.repository.InstructorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,30 +14,41 @@ import java.util.stream.Collectors;
 
 @Service
 public class InstructorService {
+
+    private final InstructorMapper instructorMapper;
+
     @Autowired
-    private InstructorRepository instructorRepository;
+    public InstructorService(InstructorMapper instructorMapper) {
+        this.instructorMapper = instructorMapper;
+    }
 
     public InstructorDto getInstructor(String id) {
-        Instructor instructor = instructorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Instructor not found with id: " + id));
+        Instructor instructor = instructorMapper.findById(id);
+        if (instructor == null) {
+            throw new ResourceNotFoundException("Instructor not found with id: " + id);
+        }
         return convertToDto(instructor);
     }
 
     public List<InstructorDto> getAllInstructors() {
-        return instructorRepository.findAll().stream()
+        return instructorMapper.findAll().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     public InstructorDto getInstructorByUsername(String username) {
-        Instructor instructor = instructorRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Instructor not found with username: " + username));
+        Instructor instructor = instructorMapper.findByUsername(username);
+        if (instructor == null) {
+            throw new ResourceNotFoundException("Instructor not found with username: " + username);
+        }
         return convertToDto(instructor);
     }
 
     public InstructorDto getInstructorByEmail(String email) {
-        Instructor instructor = instructorRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Instructor not found with email: " + email));
+        Instructor instructor = instructorMapper.findByEmail(email);
+        if (instructor == null) {
+            throw new ResourceNotFoundException("Instructor not found with email: " + email);
+        }
         return convertToDto(instructor);
     }
 
@@ -55,10 +66,10 @@ public class InstructorService {
     @Transactional
     public InstructorDto createInstructor(InstructorDto instructorDto) {
         // Check if username or email already exists
-        if (instructorRepository.existsByUsername(instructorDto.getUsername())) {
+        if (instructorMapper.existsByUsername(instructorDto.getUsername())) {
             throw new IllegalArgumentException("Username already taken");
         }
-        if (instructorRepository.existsByEmail(instructorDto.getEmail())) {
+        if (instructorMapper.existsByEmail(instructorDto.getEmail())) {
             throw new IllegalArgumentException("Email already taken");
         }
 
@@ -77,24 +88,26 @@ public class InstructorService {
         instructor.setPassword(instructorDto.getPassword());
         instructor.setIntroContent(instructorDto.getIntroContent());
 
-        Instructor savedInstructor = instructorRepository.save(instructor);
-        return convertToDto(savedInstructor);
+        instructorMapper.insert(instructor);
+        return convertToDto(instructor);
     }
 
     @Transactional
     public InstructorDto updateInstructor(String id, InstructorDto instructorDto) {
-        Instructor instructor = instructorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Instructor not found with id: " + id));
+        Instructor instructor = instructorMapper.findById(id);
+        if (instructor == null) {
+            throw new ResourceNotFoundException("Instructor not found with id: " + id);
+        }
 
         // Check if username is being changed and if it's already taken
         if (!instructor.getUsername().equals(instructorDto.getUsername())
-                && instructorRepository.existsByUsername(instructorDto.getUsername())) {
+                && instructorMapper.existsByUsername(instructorDto.getUsername())) {
             throw new IllegalArgumentException("Username already taken");
         }
 
         // Check if email is being changed and if it's already taken
         if (!instructor.getEmail().equals(instructorDto.getEmail())
-                && instructorRepository.existsByEmail(instructorDto.getEmail())) {
+                && instructorMapper.existsByEmail(instructorDto.getEmail())) {
             throw new IllegalArgumentException("Email already taken");
         }
 
@@ -106,15 +119,17 @@ public class InstructorService {
         }
         instructor.setIntroContent(instructorDto.getIntroContent());
 
-        Instructor updatedInstructor = instructorRepository.save(instructor);
-        return convertToDto(updatedInstructor);
+        instructorMapper.update(instructor);
+        return convertToDto(instructor);
     }
 
     @Transactional
     public void deleteInstructor(String id) {
-        Instructor instructor = instructorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Instructor not found with id: " + id));
-        instructorRepository.delete(instructor);
+        Instructor instructor = instructorMapper.findById(id);
+        if (instructor == null) {
+            throw new ResourceNotFoundException("Instructor not found with id: " + id);
+        }
+        instructorMapper.deleteById(id);
     }
 
     /**
@@ -126,11 +141,13 @@ public class InstructorService {
      */
     public boolean authenticateInstructor(String email, String password) {
         try {
-            Instructor instructor = instructorRepository.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("Instructor not found with email: " + email));
+            Instructor instructor = instructorMapper.findByEmail(email);
+            if (instructor == null) {
+                return false;
+            }
             // In a real application, you should use a password encoder
             return instructor.getPassword().equals(password);
-        } catch (ResourceNotFoundException e) {
+        } catch (Exception e) {
             return false;
         }
     }

@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.MessageMapper">
+    <resultMap id="MessageResultMap" type="com.example.demo.model.Message">
+        <id property="id" column="message_id" />
+        <result property="senderId" column="sender_id" />
+        <result property="receiverId" column="receiver_id" />
+        <result property="content" column="content" />
+        <result property="createdTime" column="created_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        message_id, sender_id, receiver_id, content, created_time
+    </sql>
+
+    <select id="findById" resultMap="MessageResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        MESSAGE
+        WHERE
+        message_id = #{messageId}
+    </select>
+
+    <select id="findAll" resultMap="MessageResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        MESSAGE
+    </select>
+
+    <select id="findBySenderId" resultMap="MessageResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        MESSAGE
+        WHERE
+        sender_id = #{senderId}
+        ORDER BY
+        created_time DESC
+    </select>
+
+    <select id="findByReceiverId" resultMap="MessageResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        MESSAGE
+        WHERE
+        receiver_id = #{receiverId}
+        ORDER BY
+        created_time DESC
+    </select>
+
+    <select id="findConversation" resultMap="MessageResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        MESSAGE
+        WHERE
+        (sender_id = #{user1Id} AND receiver_id = #{user2Id})
+        OR
+        (sender_id = #{user2Id} AND receiver_id = #{user1Id})
+        ORDER BY
+        created_time ASC
+    </select>
+
+    <select id="findByCreatedTimeAfter" resultMap="MessageResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        MESSAGE
+        WHERE
+        created_time > #{time}
+        ORDER BY
+        created_time DESC
+    </select>
+
+    <!-- DYNAMIC SQL QUERIES BEGIN HERE -->
+
+    <!-- Dynamic SQL for finding messages with multiple filter options -->
+    <select id="findMessagesWithFilters" parameterType="map" resultMap="MessageResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM MESSAGE
+        <where>
+            <if test="senderId != null">
+                sender_id = #{senderId}
+            </if>
+            <if test="receiverId != null">
+                <if test="senderId != null">AND</if> receiver_id = #{receiverId}
+            </if>
+            <if test="startDate != null">
+                <if test="senderId != null or receiverId != null">AND</if> created_time >= #{startDate}
+            </if>
+            <if test="endDate != null">
+                <if test="senderId != null or receiverId != null or startDate != null">AND</if> created_time &lt;= #{endDate}
+            </if>
+            <if test="content != null and content != ''">
+                <if test="senderId != null or receiverId != null or startDate != null or endDate != null">AND</if>
+                content LIKE CONCAT('%', #{content}, '%')
+            </if>
+        </where>
+        <choose>
+            <when test="sortField != null and sortField == 'sender'">
+                ORDER BY sender_id
+            </when>
+            <when test="sortField != null and sortField == 'receiver'">
+                ORDER BY receiver_id
+            </when>
+            <otherwise>
+                ORDER BY created_time
+                <if test="sortDirection != null and sortDirection.toUpperCase() == 'ASC'">ASC</if>
+                <if test="sortDirection == null or sortDirection.toUpperCase() != 'ASC'">DESC</if>
+            </otherwise>
+        </choose>
+        <if test="limit != null">
+            LIMIT #{limit}
+            <if test="offset != null">
+                OFFSET #{offset}
+            </if>
+        </if>
+    </select>
+
+    <!-- Dynamic conversation search with different parameter combinations -->
+    <select id="findConversationDynamic" resultMap="MessageResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM MESSAGE
+        <where>
+            <choose>
+                <!-- If both users specified, show their conversation -->
+                <when test="user1Id != null and user2Id != null">
+                    (sender_id = #{user1Id} AND receiver_id = #{user2Id})
+                    OR (sender_id = #{user2Id} AND receiver_id = #{user1Id})
+                </when>
+                <!-- If only one user specified, show all their messages -->
+                <when test="user1Id != null">
+                    sender_id = #{user1Id} OR receiver_id = #{user1Id}
+                </when>
+            </choose>
+            <if test="keyword != null and keyword != ''">
+                AND content LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="daysBack != null">
+                AND created_time > DATE_SUB(NOW(), INTERVAL #{daysBack} DAY)
+            </if>
+        </where>
+        ORDER BY created_time
+        <if test="orderDirection != null and orderDirection.toUpperCase() == 'DESC'">
+            DESC
+        </if>
+        <if test="orderDirection == null or orderDirection.toUpperCase() != 'DESC'">
+            ASC
+        </if>
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- Find recent conversations (grouped by user) -->
+    <select id="findRecentConversations" resultType="map">
+        SELECT
+        CASE
+        WHEN sender_id = #{userId} THEN receiver_id
+        ELSE sender_id
+        END AS conversation_with,
+        MAX(created_time) AS last_message_time,
+        COUNT(*) AS message_count
+        FROM MESSAGE
+        WHERE
+        sender_id = #{userId} OR receiver_id = #{userId}
+        GROUP BY conversation_with
+        ORDER BY last_message_time DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- Dynamic search across all messages with complicated conditions -->
+    <select id="searchMessages" resultMap="MessageResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM MESSAGE
+        <where>
+            <if test="searchTerm != null and searchTerm != ''">
+                content LIKE CONCAT('%', #{searchTerm}, '%')
+            </if>
+            <if test="userIds != null and userIds.size > 0">
+                AND (
+                <foreach collection="userIds" item="userId" separator=" OR ">
+                    sender_id = #{userId} OR receiver_id = #{userId}
+                </foreach>
+                )
+            </if>
+            <if test="dateRange != null">
+                <if test="dateRange.startDate != null">
+                    AND created_time >= #{dateRange.startDate}
+                </if>
+                <if test="dateRange.endDate != null">
+                    AND created_time &lt;= #{dateRange.endDate}
+                </if>
+            </if>
+            <if test="excludeUserIds != null and excludeUserIds.size > 0">
+                AND sender_id NOT IN
+                <foreach collection="excludeUserIds" item="userId" open="(" separator="," close=")">
+                    #{userId}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY created_time DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+            <if test="offset != null">
+                OFFSET #{offset}
+            </if>
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.model.Message">
+        INSERT INTO MESSAGE (
+            message_id,
+            sender_id,
+            receiver_id,
+            content,
+            created_time
+        ) VALUES (
+                     #{id},
+                     #{senderId},
+                     #{receiverId},
+                     #{content},
+                     #{createdTime}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.model.Message">
+        UPDATE MESSAGE SET
+                           sender_id = #{senderId},
+                           receiver_id = #{receiverId},
+                           content = #{content},
+                           created_time = #{createdTime}
+        WHERE
+            message_id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM MESSAGE
+        WHERE message_id = #{messageId}
+    </delete>
+
+    <!-- Execute dynamically generated SQL from LLM -->
+    <select id="executeNaturalLanguageQuery" parameterType="map" resultType="map">
+        ${dynamicSql}
+    </select>
+</mapper>

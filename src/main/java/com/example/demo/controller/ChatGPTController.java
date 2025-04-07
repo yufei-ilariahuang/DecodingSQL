@@ -1,8 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.PromptRequest;
 import com.example.demo.service.ChatGPTService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +18,7 @@ public class ChatGPTController {
     }
 
     @PostMapping
-    public String chat(@RequestBody PromptRequest promptRequest ) {
-        return chatGPTService.getChatGPTResponse(promptRequest);
+    public String chat(@RequestBody  String userPrompt) {
+        return chatGPTService.getChatGPTResponse(userPrompt);
     }
 }

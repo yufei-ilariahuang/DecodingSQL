@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.StudentMapper">
+    <resultMap id="StudentResultMap" type="com.example.demo.model.Student">
+        <id property="studentId" column="student_id" />
+        <result property="username" column="username" />
+        <result property="email" column="email" />
+        <result property="password" column="password" />
+        <result property="introContent" column="intro_content" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        student_id, username, email, password, intro_content
+    </sql>
+    <select id="getStudentStatistics" parameterType="string" resultType="java.util.Map">
+        SELECT
+        s.student_id,
+        s.username,
+        s.email,
+        <!-- Calculate current GPA based on submissions -->
+        (
+        SELECT COALESCE(
+        FORMAT(
+        AVG(
+        CASE
+        WHEN ss.grade >= 90 THEN 4.0
+        WHEN ss.grade >= 80 THEN 3.0
+        WHEN ss.grade >= 70 THEN 2.0
+        WHEN ss.grade >= 60 THEN 1.0
+        ELSE 0.0
+        END
+        ), 1
+        ), '0.0'
+        )
+        FROM SESSION_SUBMISSION ss
+        WHERE ss.student_id = s.student_id
+        AND ss.grade IS NOT NULL
+        ) AS currentGPA,
+
+        <!-- Count problems solved -->
+        (
+        SELECT COUNT(DISTINCT ss.problem_id)
+        FROM SESSION_SUBMISSION ss
+        WHERE ss.student_id = s.student_id
+        ) AS problemsSolved,
+
+        <!-- Count total problems available -->
+        (
+        SELECT COUNT(*)
+        FROM SQL_PROBLEM
+        ) AS totalProblems,
+
+        <!-- Calculate average grade -->
+        (
+        SELECT COALESCE(ROUND(AVG(ss.grade), 1), 0.0)
+        FROM SESSION_SUBMISSION ss
+        WHERE ss.student_id = s.student_id
+        AND ss.grade IS NOT NULL
+        ) AS averageGrade,
+
+        <!-- Count pending assignments -->
+        (
+        SELECT COUNT(DISTINCT p.id)
+        FROM SQL_PROBLEM p
+        JOIN TRAINING_SESSION ts ON FIND_IN_SET(p.id, ts.problem_ids)
+        LEFT JOIN SESSION_SUBMISSION ss ON ss.problem_id = p.id AND ss.student_id = s.student_id
+        WHERE FIND_IN_SET(s.student_id, ts.student_ids)
+        AND ss.id IS NULL
+        ) AS pendingAssignments
+        FROM
+        STUDENT s
+        WHERE
+        s.student_id = #{studentId}
+    </select>
+
+    <select id="findById" resultMap="StudentResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        STUDENT
+        WHERE
+        student_id = #{studentId}
+    </select>
+
+    <select id="findAll" resultMap="StudentResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        STUDENT
+    </select>
+
+    <select id="findByUsername" resultMap="StudentResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        STUDENT
+        WHERE
+        username = #{username}
+    </select>
+
+    <select id="existsByUsername" resultType="boolean">
+        SELECT
+            CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM
+            STUDENT
+        WHERE
+            username = #{username}
+    </select>
+
+    <select id="existsByEmail" resultType="boolean">
+        SELECT
+            CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM
+            STUDENT
+        WHERE
+            email = #{email}
+    </select>
+
+    <select id="findByEmail" resultMap="StudentResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        STUDENT
+        WHERE
+        email = #{email}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.model.Student">
+        INSERT INTO STUDENT (
+            student_id,
+            username,
+            email,
+            password,
+            intro_content
+        ) VALUES (
+                     #{studentId},
+                     #{username},
+                     #{email},
+                     #{password},
+                     #{introContent}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.model.Student">
+        UPDATE STUDENT SET
+                           username = #{username},
+                           email = #{email},
+                           password = #{password},
+                           intro_content = #{introContent}
+        WHERE
+            student_id = #{studentId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM STUDENT
+        WHERE student_id = #{studentId}
+    </delete>
+</mapper>

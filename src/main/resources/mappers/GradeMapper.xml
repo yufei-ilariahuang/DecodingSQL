@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.GradeMapper">
+    <resultMap id="GradeResultMap" type="com.example.demo.model.Grade">
+        <id property="sessionId" column="session_id" />
+        <id property="createdTime" column="created_time" />
+        <result property="grade" column="grade" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        session_id, created_time, grade
+    </sql>
+
+    <select id="findBySessionIdAndCreatedTime" resultMap="GradeResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        GRADE
+        WHERE
+        session_id = #{sessionId}
+        AND created_time = #{createdTime}
+    </select>
+
+    <select id="findAll" resultMap="GradeResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        GRADE
+    </select>
+
+    <select id="findBySessionId" resultMap="GradeResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        GRADE
+        WHERE
+        session_id = #{sessionId}
+    </select>
+
+    <select id="findByCreatedTimeAfter" resultMap="GradeResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        GRADE
+        WHERE
+        created_time > #{time}
+    </select>
+
+    <select id="countAll" resultType="int">
+        SELECT
+            COUNT(*)
+        FROM
+            GRADE
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.model.Grade">
+        INSERT INTO GRADE (
+            session_id,
+            created_time,
+            grade
+        ) VALUES (
+                     #{sessionId},
+                     #{createdTime},
+                     #{grade}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.model.Grade">
+        UPDATE GRADE SET
+            grade = #{grade}
+        WHERE
+            session_id = #{sessionId}
+          AND created_time = #{createdTime}
+    </update>
+
+    <delete id="deleteBySessionIdAndCreatedTime">
+        DELETE FROM GRADE
+        WHERE session_id = #{sessionId}
+          AND created_time = #{createdTime}
+    </delete>
+</mapper>

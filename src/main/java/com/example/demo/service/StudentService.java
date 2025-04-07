@@ -2,8 +2,8 @@ package com.example.demo.service;
 
 import com.example.demo.dto.StudentDto;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.mapper.StudentMapper;
 import com.example.demo.model.Student;
-import com.example.demo.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,30 +14,41 @@ import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
+
+    private final StudentMapper studentMapper;
+
     @Autowired
-    private StudentRepository studentRepository;
+    public StudentService(StudentMapper studentMapper) {
+        this.studentMapper = studentMapper;
+    }
 
     public StudentDto getStudent(String id) {
-        Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
+        Student student = studentMapper.findById(id);
+        if (student == null) {
+            throw new ResourceNotFoundException("Student not found with id: " + id);
+        }
         return convertToDto(student);
     }
 
     public List<StudentDto> getAllStudents() {
-        return studentRepository.findAll().stream()
+        return studentMapper.findAll().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     public StudentDto getStudentByUsername(String username) {
-        Student student = studentRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found with username: " + username));
+        Student student = (Student) studentMapper.findByUsername(username);
+        if (student == null) {
+            throw new ResourceNotFoundException("Student not found with username: " + username);
+        }
         return convertToDto(student);
     }
 
     public StudentDto getStudentByEmail(String email) {
-        Student student = studentRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found with email: " + email));
+        Student student = studentMapper.findByEmail(email);
+        if (student == null) {
+            throw new ResourceNotFoundException("Student not found with email: " + email);
+        }
         return convertToDto(student);
     }
 
@@ -55,10 +66,10 @@ public class StudentService {
     @Transactional
     public StudentDto createStudent(StudentDto studentDto) {
         // Check if username or email already exists
-        if (studentRepository.existsByUsername(studentDto.getUsername())) {
+        if (studentMapper.existsByUsername(studentDto.getUsername())) {
             throw new IllegalArgumentException("Username already taken");
         }
-        if (studentRepository.existsByEmail(studentDto.getEmail())) {
+        if (studentMapper.existsByEmail(studentDto.getEmail())) {
             throw new IllegalArgumentException("Email already taken");
         }
 
@@ -77,24 +88,26 @@ public class StudentService {
         student.setPassword(studentDto.getPassword());
         student.setIntroContent(studentDto.getIntroContent());
 
-        Student savedStudent = studentRepository.save(student);
-        return convertToDto(savedStudent);
+        studentMapper.insert(student);
+        return convertToDto(student);
     }
 
     @Transactional
     public StudentDto updateStudent(String id, StudentDto studentDto) {
-        Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
+        Student student = studentMapper.findById(id);
+        if (student == null) {
+            throw new ResourceNotFoundException("Student not found with id: " + id);
+        }
 
         // Check if username is being changed and if it's already taken
         if (!student.getUsername().equals(studentDto.getUsername())
-                && studentRepository.existsByUsername(studentDto.getUsername())) {
+                && studentMapper.existsByUsername(studentDto.getUsername())) {
             throw new IllegalArgumentException("Username already taken");
         }
 
         // Check if email is being changed and if it's already taken
         if (!student.getEmail().equals(studentDto.getEmail())
-                && studentRepository.existsByEmail(studentDto.getEmail())) {
+                && studentMapper.existsByEmail(studentDto.getEmail())) {
             throw new IllegalArgumentException("Email already taken");
         }
 
@@ -106,15 +119,17 @@ public class StudentService {
         }
         student.setIntroContent(studentDto.getIntroContent());
 
-        Student updatedStudent = studentRepository.save(student);
-        return convertToDto(updatedStudent);
+        studentMapper.update(student);
+        return convertToDto(student);
     }
 
     @Transactional
     public void deleteStudent(String id) {
-        Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
-        studentRepository.delete(student);
+        Student student = studentMapper.findById(id);
+        if (student == null) {
+            throw new ResourceNotFoundException("Student not found with id: " + id);
+        }
+        studentMapper.deleteById(id);
     }
 
     /**
@@ -126,11 +141,13 @@ public class StudentService {
      */
     public boolean authenticateStudent(String email, String password) {
         try {
-            Student student = studentRepository.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("Student not found with email: " + email));
+            Student student = studentMapper.findByEmail(email);
+            if (student == null) {
+                return false;
+            }
             // In a real application, you should use a password encoder
             return student.getPassword().equals(password);
-        } catch (ResourceNotFoundException e) {
+        } catch (Exception e) {
             return false;
         }
     }

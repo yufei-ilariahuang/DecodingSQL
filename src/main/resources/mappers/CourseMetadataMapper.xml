@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.CourseMetadataMapper">
+    <resultMap id="CourseMetadataResultMap" type="com.example.demo.model.CourseMetadata">
+        <id property="sessionId" column="session_id" />
+        <result property="courseTitle" column="course_title" />
+        <result property="courseCode" column="course_code" />
+        <result property="instructorId" column="instructor_id" />
+        <result property="credits" column="credits" />
+        <result property="description" column="description" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        session_id, course_title, course_code, instructor_id, credits, description
+    </sql>
+
+    <select id="findById" resultMap="CourseMetadataResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        COURSE_METADATA
+        WHERE
+        session_id = #{sessionId}
+    </select>
+
+    <select id="findAll" resultMap="CourseMetadataResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        COURSE_METADATA
+    </select>
+
+    <select id="findByInstructorId" resultMap="CourseMetadataResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        COURSE_METADATA
+        WHERE
+        instructor_id = #{instructorId}
+    </select>
+    <select id="getStudentCourses" parameterType="string" resultType="java.util.Map">
+        <!-- We'll use a direct query rather than a stored procedure since the stored procedure
+             might not be properly created in your database yet -->
+        SELECT
+        cm.course_code AS id,
+        cm.course_title AS title,
+        i.username AS instructor,
+        cm.credits,
+        /* Calculate progress based on submitted problems */
+        (
+        SELECT
+        COALESCE(
+        ROUND(
+        (COUNT(DISTINCT ss.problem_id) * 100.0) /
+        (LENGTH(ts.problem_ids) - LENGTH(REPLACE(ts.problem_ids, ',', '')) + 1)
+        ), 0
+        )
+        FROM SESSION_SUBMISSION ss
+        WHERE ss.student_id = #{studentId}
+        AND FIND_IN_SET(ss.problem_id, ts.problem_ids)
+        ) AS progress,
+        /* Determine letter grade based on average submission score */
+        (
+        SELECT
+        CASE
+        WHEN AVG(grade) >= 90 THEN 'A'
+        WHEN AVG(grade) >= 80 THEN 'B+'
+        WHEN AVG(grade) >= 70 THEN 'B'
+        WHEN AVG(grade) >= 60 THEN 'C+'
+        ELSE 'C'
+        END
+        FROM SESSION_SUBMISSION ss
+        WHERE ss.student_id = #{studentId}
+        AND FIND_IN_SET(ss.problem_id, ts.problem_ids)
+        ) AS grade
+        FROM
+        COURSE_METADATA cm
+        JOIN
+        INSTRUCTOR i ON cm.instructor_id = i.instructor_id
+        JOIN
+        TRAINING_SESSION ts ON cm.session_id = ts.session_id
+        WHERE
+        FIND_IN_SET(#{studentId}, ts.student_ids)
+    </select>
+
+    <select id="findSessionsByStudentId" parameterType="string" resultType="java.util.Map">
+        SELECT
+            ts.session_id,
+            ts.problem_ids,
+            ts.student_ids
+        FROM
+            TRAINING_SESSION ts
+        WHERE
+            FIND_IN_SET(#{studentId}, ts.student_ids)
+    </select>
+
+    <select id="findSessionsByInstructorId" parameterType="string" resultType="java.util.Map">
+        SELECT
+            ts.session_id,
+            ts.problem_ids,
+            ts.student_ids
+        FROM
+            TRAINING_SESSION ts
+                JOIN
+            COURSE_METADATA cm ON ts.session_id = cm.session_id
+        WHERE
+            cm.instructor_id = #{instructorId}
+    </select>
+    <select id="getInstructorCourses" parameterType="string" resultType="java.util.Map">
+        SELECT
+            cm.course_code AS id,
+            cm.course_title AS title,
+            (LENGTH(ts.student_ids) - LENGTH(REPLACE(ts.student_ids, ',', '')) + 1) AS students,
+            (LENGTH(ts.problem_ids) - LENGTH(REPLACE(ts.problem_ids, ',', '')) + 1) AS problems,
+            (
+                SELECT COALESCE(AVG(grade), 0)
+                FROM SESSION_SUBMISSION ss
+                         JOIN TRAINING_SESSION ts2 ON FIND_IN_SET(ss.problem_id, ts2.problem_ids)
+                WHERE ts2.session_id = ts.session_id
+            ) AS averageGrade
+        FROM
+            COURSE_METADATA cm
+                JOIN
+            TRAINING_SESSION ts ON cm.session_id = ts.session_id
+        WHERE
+            cm.instructor_id = #{instructorId}
+    </select>
+    <insert id="insert" parameterType="com.example.demo.model.CourseMetadata">
+        INSERT INTO COURSE_METADATA (
+            session_id,
+            course_title,
+            course_code,
+            instructor_id,
+            credits,
+            description
+        ) VALUES (
+                     #{sessionId},
+                     #{courseTitle},
+                     #{courseCode},
+                     #{instructorId},
+                     #{credits},
+                     #{description}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.model.CourseMetadata">
+        UPDATE COURSE_METADATA SET
+                                   course_title = #{courseTitle},
+                                   course_code = #{courseCode},
+                                   instructor_id = #{instructorId},
+                                   credits = #{credits},
+                                   description = #{description}
+        WHERE
+            session_id = #{sessionId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM COURSE_METADATA
+        WHERE session_id = #{sessionId}
+    </delete>
+</mapper>

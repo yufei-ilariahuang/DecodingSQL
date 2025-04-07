@@ -267,111 +267,157 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .course-card-body {
-            padding: 20px;
-        }
+.course-card-body {
+padding: 20px;
+}
 
-        .course-card-footer {
-            padding: 15px 20px;
-            background-color: rgba(255, 255, 255, 0.02);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
+.course-card-footer {
+padding: 15px 20px;
+background-color: rgba(255, 255, 255, 0.02);
+border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
 
-        .course-title {
-            font-weight: 600;
-            font-size: 1.2rem;
-            margin-bottom: 5px;
-        }
+.course-title {
+font-weight: 600;
+font-size: 1.2rem;
+margin-bottom: 5px;
+}
 
-        .course-instructor {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 0;
-        }
+.course-instructor {
+color: var(--text-secondary);
+font-size: 0.9rem;
+margin-bottom: 0;
+}
 
-        .grade-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-weight: 700;
-            font-size: 1rem;
-        }
+.grade-badge {
+position: absolute;
+top: 15px;
+right: 15px;
+width: 40px;
+height: 40px;
+display: flex;
+align-items: center;
+justify-content: center;
+border-radius: 50%;
+font-weight: 700;
+font-size: 1rem;
+}
 
-        .grade-a {
-            background-color: rgba(46, 204, 113, 0.2);
-            color: var(--success-color);
-        }
+.grade-a {
+background-color: rgba(46, 204, 113, 0.2);
+color: var(--success-color);
+}
 
-        .grade-b {
-            background-color: rgba(243, 156, 18, 0.2);
-            color: var(--warning-color);
-        }
+.grade-b {
+background-color: rgba(243, 156, 18, 0.2);
+color: var(--warning-color);
+}
 
-        .grade-c {
-            background-color: rgba(231, 76, 60, 0.2);
-            color: var(--danger-color);
-        }
+.grade-c {
+background-color: rgba(231, 76, 60, 0.2);
+color: var(--danger-color);
+}
 
-        .course-progress {
-            margin-top: 15px;
-        }
+.course-progress {
+margin-top: 15px;
+}
 
-        .course-stat {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
+.course-stat {
+display: flex;
+align-items: center;
+margin-bottom: 10px;
+}
 
-        .course-stat-icon {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-            color: var(--primary-color);
-        }
+.course-stat-icon {
+margin-right: 10px;
+width: 20px;
+text-align: center;
+color: var(--primary-color);
+}
 
-        .course-stat-value {
-            font-weight: 500;
-        }
+.course-stat-value {
+font-weight: 500;
+}
 
-        @media (max-width: 992px) {
-            .dashboard-container {
-                padding: 20px 0;
-            }
+@media (max-width: 992px) {
+.dashboard-container {
+padding: 20px 0;
+}
 
-            .dashboard-title {
-                font-size: 1.8rem;
-            }
-        }
+.dashboard-title {
+font-size: 1.8rem;
+}
+}
 
-        @media (max-width: 768px) {
-            .navbar-brand {
-                font-size: 1.5rem;
-            }
+@media (max-width: 768px) {
+.navbar-brand {
+font-size: 1.5rem;
+}
 
-            .dashboard-title {
-                font-size: 1.5rem;
-            }
+.dashboard-title {
+font-size: 1.5rem;
+}
 
-            .stat-value {
-                font-size: 1.5rem;
-            }
-        }
+.stat-value {
+font-size: 1.5rem;
+}
+}
 
-        /* Additional styling for highlighting */
-        .highlight {
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+/* Additional styling for highlighting */
+.highlight {
+background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+-webkit-background-clip: text;
+background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+
+/* Message UI styles */
+.message-panel {
+height: 400px;
+overflow-y: auto;
+border-radius: 10px;
+background-color: rgba(255, 255, 255, 0.02);
+border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.message-item {
+padding: 12px 15px;
+margin: 10px;
+border-radius: 10px;
+position: relative;
+}
+
+.message-sent {
+background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+color: var(--darker-bg);
+margin-left: 20%;
+}
+
+.message-received {
+background-color: rgba(255, 255, 255, 0.05);
+margin-right: 20%;
+}
+
+.message-header {
+display: flex;
+justify-content: space-between;
+margin-bottom: 5px;
+font-size: 0.8rem;
+}
+
+.message-sender {
+font-weight: 600;
+}
+
+.message-time {
+color: var(--text-secondary);
+}
+
+.message-content {
+word-break: break-word;
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark">
@@ -461,7 +507,7 @@
                 <div class="d-grid gap-2">
                     <a href="/problems" class="btn btn-action">Start a New Problem</a>
                     <a href="/submissions" class="btn btn-outline">View Recent Submissions</a>
-                    <a href="/workspace" class="btn btn-outline">Open SQL Workspace</a>
+                    <button id="open-sql-chat" class="btn btn-outline">Ask SQL Assistant</button>
                 </div>
             </div>
         </div>
@@ -623,31 +669,24 @@
         <div class="col-lg-6">
             <div class="dashboard-card">
                 <h2 class="card-title"><i class="fas fa-envelope"></i> Recent Messages</h2>
-                <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action" style="background-color: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.05); color: var(--text-color);">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">Feedback on Assignment #3</h5>
-                            <small>2 days ago</small>
+                <div class="message-panel">
+                    <!-- Dynamic messages will be loaded here -->
+                    <div th:if="${#lists.isEmpty(messages)}">
+                        <div class="text-center p-4 text-muted">
+                            <i class="fas fa-comment-slash fa-2x mb-3"></i>
+                            <p>No messages to display</p>
                         </div>
-                        <p class="mb-1">Your solution was great, but I have a few suggestions...</p>
-                        <small class="text-muted">From: Dr. Smith</small>
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action" style="background-color: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.05); color: var(--text-color);">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">New Assignment Posted</h5>
-                            <small>3 days ago</small>
+                    </div>
+
+                    <div th:each="message : ${messages}" th:class="${message.senderId == studentId ? 'message-item message-sent' : 'message-item message-received'}">
+                        <div class="message-header">
+                            <span class="message-sender" th:text="${message.senderId == studentId ? 'You' : message.senderName}">Dr. Smith</span>
+                            <span class="message-time" th:text="${#dates.format(message.createdTime, 'MMM d, yyyy h:mm a')}">Apr 2, 2025 3:30 PM</span>
                         </div>
-                        <p class="mb-1">Check out the new SQL optimization challenge...</p>
-                        <small class="text-muted">From: Prof. Johnson</small>
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action" style="background-color: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.05); color: var(--text-color);">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">Group Project Update</h5>
-                            <small>1 week ago</small>
+                        <div class="message-content" th:text="${message.content}">
+                            Your solution was great, but I have a few suggestions...
                         </div>
-                        <p class="mb-1">Here's the updated ERD for our database design...</p>
-                        <small class="text-muted">From: Team Member</small>
-                    </a>
+                    </div>
                 </div>
                 <div class="text-center mt-3">
                     <a href="/messages" class="btn btn-outline btn-sm">View All Messages</a>
@@ -657,6 +696,232 @@
     </div>
 </div>
 
+<!-- Include the SQL Chatbot -->
+<div id="sql-chatbot" class="position-fixed bottom-0 end-0 m-4">
+    <!-- Chatbot Toggle Button -->
+    <button id="chatbot-toggle" class="btn btn-action rounded-circle shadow-lg p-3" style="width: 60px; height: 60px;">
+        <i class="fas fa-robot"></i>
+    </button>
+    <input type="hidden" id="current-user-id" th:value="${studentId}">
+    <!-- Chatbot Window -->
+    <div id="chatbot-window" class="card shadow-lg" style="display: none; width: 350px; position: absolute; bottom: 70px; right: 0; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1);">
+        <!-- Header -->
+        <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); color: var(--darker-bg); padding: 15px;">
+            <h5 class="mb-0" style="font-weight: 600;">SQL Assistant</h5>
+            <button id="close-chatbot" class="btn btn-sm text-dark">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chat-messages" class="card-body" style="background-color: var(--card-bg); height: 300px; overflow-y: auto; padding: 15px;">
+            <div class="message bot-message">
+                <div class="message-content">
+                    <p>Hi there! I'm your SQL Assistant. Ask me to find messages or write SQL queries for you!</p>
+                    <p>Try something like:</p>
+                    <ul>
+                        <li>"Show me messages from Dr. Smith"</li>
+                        <li>"Find conversations between Alice and Dr. Johnson in March"</li>
+                        <li>"How many messages were sent last week?"</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="card-footer" style="background-color: var(--card-bg); border-top: 1px solid rgba(255, 255, 255, 0.05); padding: 10px;">
+            <form id="chat-form" class="d-flex">
+                <input id="chat-input" type="text" class="form-control me-2" placeholder="Ask me about SQL or messages..." style="background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-color);">
+                <button type="submit" class="btn btn-action">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the messages panel to scroll to the bottom
+        const messagePanel = document.querySelector('.message-panel');
+        if (messagePanel) {
+            messagePanel.scrollTop = messagePanel.scrollHeight;
+        }
+
+        // Add event listener for the SQL assistant button
+        const openSqlChat = document.getElementById('open-sql-chat');
+        const chatbotToggle = document.getElementById('chatbot-toggle');
+
+        if (openSqlChat && chatbotToggle) {
+            openSqlChat.addEventListener('click', function() {
+                // Trigger a click on the chatbot toggle button
+                chatbotToggle.click();
+            });
+        }
+
+        // Chatbot functionality
+        const chatbotWindow = document.getElementById('chatbot-window');
+        const closeBtn = document.getElementById('close-chatbot');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatMessages = document.getElementById('chat-messages');
+
+        // Toggle chatbot window
+        chatbotToggle.addEventListener('click', function() {
+            chatbotWindow.style.display = chatbotWindow.style.display === 'none' ? 'block' : 'none';
+            if (chatbotWindow.style.display === 'block') {
+                chatInput.focus();
+            }
+        });
+
+        // Close chatbot window
+        closeBtn.addEventListener('click', function() {
+            chatbotWindow.style.display = 'none';
+        });
+
+        // Handle form submission
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const message = chatInput.value.trim();
+            if (message) {
+                // Add user message to chat
+                addMessage(message, 'user');
+
+                // Clear input
+                chatInput.value = '';
+
+                // Show thinking indicator
+                addThinkingIndicator();
+
+                // Send message to server
+                processNaturalLanguageQuery(message);
+            }
+        });
+
+        // Add message to chat
+        function addMessage(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+
+            // If it's a simple text message
+            if (typeof message === 'string') {
+                messageContent.textContent = message;
+            } else {
+                // If it's a complex message with HTML (for bot responses)
+                messageContent.innerHTML = message;
+            }
+
+            messageDiv.appendChild(messageContent);
+            chatMessages.appendChild(messageDiv);
+
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Add thinking indicator
+        function addThinkingIndicator() {
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'message bot-message thinking-indicator';
+            thinkingDiv.id = 'thinking-indicator';
+
+            const thinkingContent = document.createElement('div');
+            thinkingContent.className = 'message-content';
+            thinkingContent.innerHTML = '<div class="d-flex"><div class="dot-flashing"></div></div>';
+
+            thinkingDiv.appendChild(thinkingContent);
+            chatMessages.appendChild(thinkingDiv);
+
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Remove thinking indicator
+        function removeThinkingIndicator() {
+            const thinkingIndicator = document.getElementById('thinking-indicator');
+            if (thinkingIndicator) {
+                thinkingIndicator.remove();
+            }
+        }
+
+        // Process natural language query - Updated to use the correct endpoint
+        function processNaturalLanguageQuery(query) {
+            const userId = document.getElementById('current-user-id').value;
+            fetch('/api/sql/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query, userId: userId })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove thinking indicator
+                    removeThinkingIndicator();
+
+                    if (data.error) {
+                        // Show error message
+                        addMessage(`Sorry, I encountered an error: ${data.error}`, 'bot');
+                    } else {
+                        // Format the response
+                        let responseHtml = '';
+
+                        // Add the response text
+                        responseHtml += '<p>Here\'s what I found:</p>';
+
+                        // If we have results, show them in a table
+                        if (data.results && data.results.length > 0) {
+                            // Limit to 5 results for display purposes
+                            const displayResults = data.results.slice(0, 5);
+                            const hasMore = data.results.length > 5;
+
+                            responseHtml += '<div class="table-responsive"><table class="sql-result-table"><thead><tr>';
+
+                            // Get headers from first result
+                            const headers = Object.keys(displayResults[0]);
+                            headers.forEach(header => {
+                                responseHtml += `<th>${header}</th>`;
+                            });
+
+                            responseHtml += '</tr></thead><tbody>';
+
+                            // Add rows
+                            displayResults.forEach(row => {
+                                responseHtml += '<tr>';
+                                headers.forEach(header => {
+                                    responseHtml += `<td>${row[header] !== null ? row[header] : ''}</td>`;
+                                });
+                                responseHtml += '</tr>';
+                            });
+
+                            responseHtml += '</tbody></table></div>';
+
+                            // Add note if we truncated results
+                            if (hasMore) {
+                                responseHtml += `<p><small>Showing 5 of ${data.results.length} results.</small></p>`;
+                            }
+                        } else {
+                            responseHtml += '<p>No results found.</p>';
+                        }
+
+                        // Add the response to the chat
+                        addMessage(responseHtml, 'bot');
+                    }
+                })
+                .catch(error => {
+                    // Remove thinking indicator
+                    removeThinkingIndicator();
+
+                    // Show error message
+                    addMessage('Sorry, there was an error processing your request.', 'bot');
+                    console.error('Error:', error);
+                });
+        }
+    });
+</script>
 </body>
 </html>

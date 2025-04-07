@@ -1,0 +1,353 @@
+<!-- SQL Chatbot Widget to be included in dashboard pages -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>SQL Chatbot Fragment</title>
+</head>
+<body>
+<!-- SQL Chatbot Widget to be included in dashboard pages -->
+<div th:fragment="sql-chatbot" id="sql-chatbot" class="position-fixed bottom-0 end-0 m-4">
+    <!-- Chatbot Toggle Button -->
+    <button id="chatbot-toggle" class="btn btn-action rounded-circle shadow-lg p-3" style="width: 60px; height: 60px;">
+        <i class="fas fa-robot"></i>
+    </button>
+    <input type="hidden" id="current-user-id"
+           th:value="${session.studentId != null ? session.studentId : session.instructorId}">
+
+    <!-- Chatbot Window -->
+    <div id="chatbot-window" class="card shadow-lg" style="display: none; width: 350px; position: absolute; bottom: 70px; right: 0; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1);">
+        <!-- Header -->
+        <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); color: var(--darker-bg); padding: 15px;">
+            <h5 class="mb-0" style="font-weight: 600;">SQL Assistant</h5>
+            <button id="close-chatbot" class="btn btn-sm text-dark">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chat-messages" class="card-body" style="background-color: var(--card-bg); height: 300px; overflow-y: auto; padding: 15px;">
+            <div class="message bot-message">
+                <div class="message-content">
+                    <p>Hi there! I'm your SQL Assistant. Ask me to find messages or write SQL queries for you!</p>
+                    <p>Try something like:</p>
+                    <ul>
+                        <li>"Show me messages from Dr. Smith"</li>
+                        <li>"Find conversations between Alice and Dr. Johnson in March"</li>
+                        <li>"How many messages were sent last week?"</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="card-footer" style="background-color: var(--card-bg); border-top: 1px solid rgba(255, 255, 255, 0.05); padding: 10px;">
+            <form id="chat-form" class="d-flex">
+                <input id="chat-input" type="text" class="form-control me-2" placeholder="Ask me about SQL or messages..." style="background-color: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-color);">
+                <button type="submit" class="btn btn-action">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .message {
+        margin-bottom: 15px;
+        max-width: 85%;
+    }
+
+    .user-message {
+        margin-left: auto;
+    }
+
+    .bot-message {
+        margin-right: auto;
+    }
+
+    .message-content {
+        padding: 10px 15px;
+        border-radius: 15px;
+    }
+
+    .user-message .message-content {
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        color: var(--darker-bg);
+    }
+
+    .bot-message .message-content {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .sql-result-table {
+        width: 100%;
+        margin-top: 8px;
+        font-size: 0.85rem;
+        border-collapse: collapse;
+    }
+
+    .sql-result-table th,
+    .sql-result-table td {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 5px;
+        text-align: left;
+    }
+
+    .sql-result-table th {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .code-block {
+        background-color: rgba(0, 0, 0, 0.3);
+        padding: 8px;
+        border-radius: 5px;
+        margin: 5px 0;
+        font-family: monospace;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatbotToggle = document.getElementById('chatbot-toggle');
+        const chatbotWindow = document.getElementById('chatbot-window');
+        const closeBtn = document.getElementById('close-chatbot');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatMessages = document.getElementById('chat-messages');
+
+        // Toggle chatbot window
+        chatbotToggle.addEventListener('click', function () {
+            chatbotWindow.style.display = chatbotWindow.style.display === 'none' ? 'block' : 'none';
+            if (chatbotWindow.style.display === 'block') {
+                chatInput.focus();
+            }
+        });
+
+        // Close chatbot window
+        closeBtn.addEventListener('click', function () {
+            chatbotWindow.style.display = 'none';
+        });
+
+        // Handle form submission
+        chatForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const message = chatInput.value.trim();
+            if (message) {
+                // Add user message to chat
+                addMessage(message, 'user');
+
+                // Clear input
+                chatInput.value = '';
+
+                // Show thinking indicator
+                addThinkingIndicator();
+
+                // Send message to server
+                processNaturalLanguageQuery(message);
+            }
+        });
+
+        // Add message to chat
+        function addMessage(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+
+            // If it's a simple text message
+            if (typeof message === 'string') {
+                messageContent.textContent = message;
+            } else {
+                // If it's a complex message with HTML (for bot responses)
+                messageContent.innerHTML = message;
+            }
+
+            messageDiv.appendChild(messageContent);
+            chatMessages.appendChild(messageDiv);
+
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function getUserId() {
+            const userIdInput = document.getElementById('current-user-id');
+            if (!userIdInput) {
+                console.error('current-user-id element not found');
+                return null;
+            }
+
+            const userId = userIdInput.value;
+            if (!userId) {
+                console.error('User ID is empty');
+                return null;
+            }
+
+            console.log('Using User ID:', userId);
+            return userId;
+        }
+
+        // Add thinking indicator
+        function addThinkingIndicator() {
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'message bot-message thinking-indicator';
+            thinkingDiv.id = 'thinking-indicator';
+
+            const thinkingContent = document.createElement('div');
+            thinkingContent.className = 'message-content';
+            thinkingContent.innerHTML = '<div class="d-flex"><div class="dot-flashing"></div></div>';
+
+            thinkingDiv.appendChild(thinkingContent);
+            chatMessages.appendChild(thinkingDiv);
+
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Remove thinking indicator
+        function removeThinkingIndicator() {
+            const thinkingIndicator = document.getElementById('thinking-indicator');
+            if (thinkingIndicator) {
+                thinkingIndicator.remove();
+            }
+        }
+
+        // Process natural language query
+        // Process natural language query
+        function processNaturalLanguageQuery(query) {
+            const userId = document.getElementById('current-user-id').value;
+            if (!userId) {
+                // Handle missing userId
+                removeThinkingIndicator();
+                addMessage('Error: Unable to identify user. Please refresh the page or contact support.', 'bot');
+                return;
+            }
+
+            console.log('Sending request with User-ID:', userId);
+            fetch('/api/sql/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({query: query, userId: userId})
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove thinking indicator
+                    removeThinkingIndicator();
+
+                    if (data.error) {
+                        // Show error message
+                        addMessage(`Sorry, I encountered an error: ${data.error}`, 'bot');
+                    } else {
+                        // Format the response
+                        let responseHtml = '';
+
+                        // Add the response text
+                        responseHtml += '<p>Here\'s what I found:</p>';
+
+                        // If we have results, show them in a table
+                        if (data.results && data.results.length > 0) {
+                            // Limit to 5 results for display purposes
+                            const displayResults = data.results.slice(0, 5);
+                            const hasMore = data.results.length > 5;
+
+                            responseHtml += '<div class="table-responsive"><table class="sql-result-table"><thead><tr>';
+
+                            // Get headers from first result
+                            const headers = Object.keys(displayResults[0]);
+                            headers.forEach(header => {
+                                responseHtml += `<th>${header}</th>`;
+                            });
+
+                            responseHtml += '</tr></thead><tbody>';
+
+                            // Add rows
+                            displayResults.forEach(row => {
+                                responseHtml += '<tr>';
+                                headers.forEach(header => {
+                                    responseHtml += `<td>${row[header] !== null ? row[header] : ''}</td>`;
+                                });
+                                responseHtml += '</tr>';
+                            });
+
+                            responseHtml += '</tbody></table></div>';
+
+                            // Add note if we truncated results
+                            if (hasMore) {
+                                responseHtml += `<p><small>Showing 5 of ${data.results.length} results.</small></p>`;
+                            }
+                        } else {
+                            responseHtml += '<p>No results found.</p>';
+                        }
+
+                        // Add the response to the chat
+                        addMessage(responseHtml, 'bot');
+                    }
+                })
+                .catch(error => {
+                    // Remove thinking indicator
+                    removeThinkingIndicator();
+
+                    // Show error message
+                    addMessage('Sorry, there was an error processing your request.', 'bot');
+                    console.error('Error:', error);
+                });
+        }
+    });
+</script>
+
+<style>
+    /* Thinking indicator animation */
+    .dot-flashing {
+        position: relative;
+        width: 10px;
+        height: 10px;
+        border-radius: 5px;
+        background-color: var(--primary-color);
+        color: var(--primary-color);
+        animation: dot-flashing 1s infinite linear alternate;
+        animation-delay: 0.5s;
+    }
+
+    .dot-flashing::before, .dot-flashing::after {
+        content: '';
+        display: inline-block;
+        position: absolute;
+        top: 0;
+    }
+
+    .dot-flashing::before {
+        left: -15px;
+        width: 10px;
+        height: 10px;
+        border-radius: 5px;
+        background-color: var(--primary-color);
+        color: var(--primary-color);
+        animation: dot-flashing 1s infinite alternate;
+        animation-delay: 0s;
+    }
+
+    .dot-flashing::after {
+        left: 15px;
+        width: 10px;
+        height: 10px;
+        border-radius: 5px;
+        background-color: var(--primary-color);
+        color: var(--primary-color);
+        animation: dot-flashing 1s infinite alternate;
+        animation-delay: 1s;
+    }
+
+    @keyframes dot-flashing {
+        0% {
+            background-color: var(--primary-color);
+        }
+        50%, 100% {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+    }
+</style>

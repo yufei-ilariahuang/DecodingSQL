@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.TrainingSessionMapper">
+    <resultMap id="TrainingSessionResultMap" type="com.example.demo.model.TrainingSession">
+        <id property="id" column="session_id" />
+        <result property="studentIds" column="student_ids" />
+        <result property="problemIds" column="problem_ids" />
+        <result property="createdTime" column="created_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        session_id, student_ids, problem_ids, created_time
+    </sql>
+
+    <select id="findById" resultMap="TrainingSessionResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        TRAINING_SESSION
+        WHERE
+        session_id = #{sessionId}
+    </select>
+
+    <select id="findAll" resultMap="TrainingSessionResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        TRAINING_SESSION
+    </select>
+
+    <select id="findByStudentId" resultMap="TrainingSessionResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        TRAINING_SESSION
+        WHERE
+        FIND_IN_SET(#{studentId}, student_ids)
+    </select>
+
+    <select id="findByProblemId" resultMap="TrainingSessionResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        TRAINING_SESSION
+        WHERE
+        FIND_IN_SET(#{problemId}, problem_ids)
+    </select>
+
+    <select id="findByCreatedDate" resultMap="TrainingSessionResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        TRAINING_SESSION
+        WHERE
+        DATE(created_time) = #{date}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.model.TrainingSession">
+        INSERT INTO TRAINING_SESSION (
+            session_id,
+            student_ids,
+            problem_ids,
+            created_time
+        ) VALUES (
+                     #{id},
+                     #{studentIds},
+                     #{problemIds},
+                     #{createdTime}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.model.TrainingSession">
+        UPDATE TRAINING_SESSION SET
+                                    student_ids = #{studentIds},
+                                    problem_ids = #{problemIds},
+                                    created_time = #{createdTime}
+        WHERE
+            session_id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM TRAINING_SESSION
+        WHERE session_id = #{sessionId}
+    </delete>
+</mapper>

@@ -30,4 +30,21 @@ public class Instructor {
 
     @Column(name = "intro_content")
     private String introContent;
+
+    // Helper method to get ID for consistency with mappers
+    public String getId() {
+        return instructorId;
+    }
+
+    // Helper method to set ID for consistency with mappers
+    public void setId(String id) {
+        this.instructorId = id;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        if (introContent == null || introContent.isEmpty()) {
+            introContent = "Hi, I am instructor " + username;
+        }
+    }
 }

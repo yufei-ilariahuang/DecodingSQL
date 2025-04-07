@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.ProblemAnswerMapper">
+    <resultMap id="ProblemAnswerResultMap" type="com.example.demo.model.ProblemAnswer">
+        <id property="problemId" column="problem_id" />
+        <result property="answer" column="answer" />
+        <result property="createdBy" column="created_by" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        problem_id, answer, created_by
+    </sql>
+
+    <select id="findByProblemId" resultMap="ProblemAnswerResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        PROBLEM_ANSWER
+        WHERE
+        problem_id = #{problemId}
+    </select>
+
+    <select id="findAll" resultMap="ProblemAnswerResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        PROBLEM_ANSWER
+    </select>
+
+    <select id="findByCreator" resultMap="ProblemAnswerResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM
+        PROBLEM_ANSWER
+        WHERE
+        created_by = #{createdBy}
+    </select>
+
+    <select id="countAll" resultType="int">
+        SELECT
+            COUNT(*)
+        FROM
+            PROBLEM_ANSWER
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.model.ProblemAnswer">
+        INSERT INTO PROBLEM_ANSWER (
+            problem_id,
+            answer,
+            created_by
+        ) VALUES (
+                     #{problemId},
+                     #{answer},
+                     #{createdBy}
+                 )
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.model.ProblemAnswer">
+        UPDATE PROBLEM_ANSWER SET
+                                  answer = #{answer},
+                                  created_by = #{createdBy}
+        WHERE
+            problem_id = #{problemId}
+    </update>
+
+    <delete id="deleteByProblemId">
+        DELETE FROM PROBLEM_ANSWER
+        WHERE problem_id = #{problemId}
+    </delete>
+</mapper>
